@@ -25,16 +25,6 @@
       --success-bg: #ecf9f3;
       --focus: rgba(37, 99, 235, .24);
       --shadow: 0 10px 30px rgba(15, 23, 42, .08);
-      --button-blue-bg: #eaf2ff;
-      --button-blue-hover: #dbeafe;
-      --button-blue-active: #bfdbfe;
-      --button-blue-border: #93b7f8;
-      --button-blue-text: #174ea6;
-      --button-cyan-bg: #e8fbfd;
-      --button-cyan-hover: #cff7fb;
-      --button-cyan-active: #a5edf4;
-      --button-cyan-border: #67d8e5;
-      --button-cyan-text: #086b7a;
       --button-red-bg: #fff0f1;
       --button-red-hover: #ffe0e3;
       --button-red-active: #ffc7cc;
@@ -62,16 +52,6 @@
       --success-bg: #17342a;
       --focus: rgba(96, 165, 250, .32);
       --shadow: 0 12px 36px rgba(0, 0, 0, .28);
-      --button-blue-bg: #172b4d;
-      --button-blue-hover: #1d3b68;
-      --button-blue-active: #254d82;
-      --button-blue-border: #356cad;
-      --button-blue-text: #c8ddff;
-      --button-cyan-bg: #12343d;
-      --button-cyan-hover: #164750;
-      --button-cyan-active: #1b5a65;
-      --button-cyan-border: #278697;
-      --button-cyan-text: #baf4fa;
       --button-red-bg: #402126;
       --button-red-hover: #58282f;
       --button-red-active: #71313a;
@@ -100,16 +80,6 @@
         --success-bg: #17342a;
         --focus: rgba(96, 165, 250, .32);
         --shadow: 0 12px 36px rgba(0, 0, 0, .28);
-        --button-blue-bg: #172b4d;
-        --button-blue-hover: #1d3b68;
-        --button-blue-active: #254d82;
-        --button-blue-border: #356cad;
-        --button-blue-text: #c8ddff;
-        --button-cyan-bg: #12343d;
-        --button-cyan-hover: #164750;
-        --button-cyan-active: #1b5a65;
-        --button-cyan-border: #278697;
-        --button-cyan-text: #baf4fa;
         --button-red-bg: #402126;
         --button-red-hover: #58282f;
         --button-red-active: #71313a;
@@ -218,32 +188,14 @@
 
     button.primary {
       border-color: transparent;
-      background: linear-gradient(110deg, var(--primary), #0891b2);
+      background: linear-gradient(110deg, #d91f3d, #f05a61);
       color: #fff;
-      box-shadow: 0 5px 14px rgba(37, 99, 235, .24);
+      box-shadow: 0 5px 14px rgba(217, 31, 61, .28);
     }
 
     button.primary:hover {
-      background: linear-gradient(110deg, var(--primary-hover), #0e7490);
+      background: linear-gradient(110deg, #b91431, #df3f4b);
     }
-
-    button.action-blue {
-      border-color: var(--button-blue-border);
-      background: var(--button-blue-bg);
-      color: var(--button-blue-text);
-    }
-
-    button.action-blue:hover { background: var(--button-blue-hover); }
-    button.action-blue:active { background: var(--button-blue-active); }
-
-    button.action-cyan {
-      border-color: var(--button-cyan-border);
-      background: var(--button-cyan-bg);
-      color: var(--button-cyan-text);
-    }
-
-    button.action-cyan:hover { background: var(--button-cyan-hover); }
-    button.action-cyan:active { background: var(--button-cyan-active); }
 
     button.action-red {
       border-color: var(--button-red-border);
@@ -254,8 +206,6 @@
     button.action-red:hover { background: var(--button-red-hover); }
     button.action-red:active { background: var(--button-red-active); }
 
-    button.action-blue:active,
-    button.action-cyan:active,
     button.action-red:active,
     button.primary:active {
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, .16);
@@ -331,7 +281,7 @@
     #messages li + li { margin-top: 5px; }
 
     .shortcut { color: var(--muted); font-size: 12px; }
-    .action-blue .shortcut, .action-cyan .shortcut, .action-red .shortcut { color: inherit; opacity: .72; }
+    .action-red .shortcut { color: inherit; opacity: .72; }
     #fileInput { display: none; }
 
     dialog {
@@ -375,13 +325,13 @@
   <main class="app">
     <header class="toolbar" aria-label="Ações do documento">
       <h1 class="brand">XMLike</h1>
-      <button id="newButton" class="action-blue" type="button">Novo</button>
-      <button id="openButton" class="action-cyan" type="button">Abrir</button>
-      <button id="clauseButton" class="action-blue" type="button" title="Alt+C">Cláusula <span class="shortcut">Alt+C</span></button>
-      <button id="tagButton" class="action-blue" type="button" title="Alt+T">Tag <span class="shortcut">Alt+T</span></button>
-      <button id="subtagButton" class="action-cyan" type="button" title="Alt+S ou Alt+Shift+T">Subtag <span class="shortcut">Alt+S</span></button>
+      <button id="newButton" class="action-red" type="button">Novo</button>
+      <button id="openButton" class="action-red" type="button">Abrir</button>
+      <button id="clauseButton" class="action-red" type="button" title="Alt+C">Cláusula <span class="shortcut">Alt+C</span></button>
+      <button id="tagButton" class="action-red" type="button" title="Alt+T">Tag <span class="shortcut">Alt+T</span></button>
+      <button id="subtagButton" class="action-red" type="button" title="Alt+S ou Alt+Shift+T">Subtag <span class="shortcut">Alt+S</span></button>
       <button id="formatButton" class="primary" type="button" title="Ctrl+Alt+F">Formatar e renumerar</button>
-      <button id="exportTxtButton" class="action-cyan" type="button">Exportar .txt</button>
+      <button id="exportTxtButton" class="action-red" type="button">Exportar .txt</button>
       <button id="exportMdButton" class="action-red" type="button">Exportar .md</button>
       <label class="theme-control" for="themeSelect">
         Tema
