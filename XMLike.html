@@ -382,6 +382,7 @@
       const OPEN_TAG_PATTERN = /^<([A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_-]*)>$/;
       const CLOSE_TAG_PATTERN = /^<\/([A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_-]*)>$/;
       const CLAUSE_PATTERN = /^(\d+)\.\s*(.*)$/;
+      const COMMENT_PATTERN = /^###.*$/;
 
       const editor = document.querySelector('#editor');
       const fileInput = document.querySelector('#fileInput');
@@ -407,6 +408,11 @@
           const value = source.trim();
           if (!value) {
             tokens.push({ type: 'blank', source, lineNumber, depth: stack.length });
+            return;
+          }
+
+          if (COMMENT_PATTERN.test(value)) {
+            tokens.push({ type: 'comment', source, lineNumber, depth: stack.length });
             return;
           }
 
@@ -572,6 +578,7 @@
           if (token.type === 'open') output.push(`${indent}<${token.name}>`);
           else if (token.type === 'close') output.push(`${indent}</${token.name}>`);
           else if (token.type === 'clause') output.push(`${indent}${clauseNumber++}. ${token.content}`);
+          else if (token.type === 'comment') output.push(`${indent}${token.source.trim()}`);
           else output.push(`${indent}${token.source.trim()}`);
           previousWasBlank = false;
         });
@@ -609,8 +616,11 @@
           const openMatch = value.match(OPEN_TAG_PATTERN);
           const closeMatch = value.match(CLOSE_TAG_PATTERN);
           const clauseMatch = value.match(CLAUSE_PATTERN);
+          const isComment = COMMENT_PATTERN.test(value);
 
-          if (openMatch) {
+          if (isComment) {
+            // Comentários não participam da numeração nem viram cláusulas automáticas.
+          } else if (openMatch) {
             stack.push(openMatch[1]);
           } else if (closeMatch) {
             if (stack.at(-1) === closeMatch[1]) stack.pop();
@@ -694,12 +704,22 @@
         saveAndValidate();
       }
 
-      function splitPastedText(text) {
-        const normalized = text.replace(/\r\n?/g, '\n').trim();
-        if (!normalized) return [];
-        return (normalized.match(/[^.\n]*\.(?:\s+|$)|[^.\n]+/g) || [])
+      function splitTextIntoClauses(text) {
+        return (text.match(/[^.\n]*\.(?:\s+|$)|[^.\n]+/g) || [])
           .map(part => part.trim())
           .filter(Boolean);
+      }
+
+      function parsePastedItems(text) {
+        const normalized = text.replace(/\r\n?/g, '\n').trim();
+        if (!normalized) return [];
+
+        return normalized.split('\n').flatMap(line => {
+          const value = line.trim();
+          if (!value) return [];
+          if (COMMENT_PATTERN.test(value)) return [{ type: 'comment', text: value }];
+          return splitTextIntoClauses(value).map(clause => ({ type: 'clause', text: clause }));
+        });
       }
 
       function handleEditorPaste(event) {
@@ -707,8 +727,8 @@
         if (!text || !findContainingTag(editor.selectionStart)) return;
         if (text.split(/\r?\n/).some(line => OPEN_TAG_PATTERN.test(line.trim()) || CLOSE_TAG_PATTERN.test(line.trim()))) return;
 
-        const clauses = splitPastedText(text);
-        if (!clauses.length) return;
+        const pastedItems = parsePastedItems(text);
+        if (!pastedItems.length) return;
         event.preventDefault();
 
         const lineStart = editor.value.lastIndexOf('\n', editor.selectionStart - 1) + 1;
@@ -719,16 +739,26 @@
         let insertion;
 
         if (currentClause) {
-          const separator = currentClause[2].trim() && !/\s$/.test(currentPrefix) ? ' ' : '';
-          insertion = separator + clauses[0];
-          clauses.slice(1).forEach(clause => {
-            insertion += `\n${indentation}${number++}. ${clause}`;
+          const firstItem = pastedItems[0];
+          const separator = currentClause[2].trim() && firstItem.type === 'clause' && !/\s$/.test(currentPrefix) ? ' ' : '';
+          insertion = firstItem.type === 'comment'
+            ? `\n${indentation}${firstItem.text}`
+            : separator + firstItem.text;
+
+          pastedItems.slice(1).forEach(item => {
+            insertion += item.type === 'comment'
+              ? `\n${indentation}${item.text}`
+              : `\n${indentation}${number++}. ${item.text}`;
           });
         } else {
-          insertion = clauses.map(clause => `${number++}. ${clause}`).join(`\n${indentation}`);
+          insertion = pastedItems.map(item => {
+            if (item.type === 'comment') return item.text;
+            return `${number++}. ${item.text}`;
+          }).join(`\n${indentation}`);
         }
 
-        if (text.trimEnd().endsWith('.')) {
+        const lastPastedItem = pastedItems.at(-1);
+        if (lastPastedItem?.type === 'clause' && lastPastedItem.text.endsWith('.')) {
           insertion += `\n${indentation}${number}. `;
         }
 
